@@ -19,16 +19,13 @@
 , libspectre
 , libarchive
 , libsecret
-, wrapGAppsHook
+, wrapGAppsHook4
 , librsvg
 , gobject-introspection
 , yelp-tools
-, gspell
 , gsettings-desktop-schemas
 , dbus
-, gst_all_1
 , gi-docgen
-, supportMultimedia ? true # PDF multimedia
 , libgxps
 , supportXPS ? true # Open XML Paper Specification via libgxps
 , withLibsecret ? true
@@ -64,10 +61,6 @@ stdenv.mkDerivation (finalAttrs: {
     };
   };
 
-  depsBuildBuild = [
-    pkg-config
-  ];
-
   nativeBuildInputs = [
     appstream
     desktop-file-utils
@@ -77,7 +70,7 @@ stdenv.mkDerivation (finalAttrs: {
     meson
     ninja
     pkg-config
-    wrapGAppsHook
+    wrapGAppsHook4
     yelp-tools
     cargo
     rustPlatform.cargoSetupHook
@@ -87,12 +80,13 @@ stdenv.mkDerivation (finalAttrs: {
     atk
     dbus # only needed to find the service directory
     djvulibre
+    exempi
     gdk-pixbuf
     ghostscriptX
     glib
     gtk4
     gsettings-desktop-schemas
-    gspell
+    libadwaita
     libarchive
     librsvg
     libspectre
@@ -102,27 +96,14 @@ stdenv.mkDerivation (finalAttrs: {
     libsecret
   ] ++ lib.optionals supportXPS [
     libgxps
-  ] ++ lib.optionals supportMultimedia (with gst_all_1; [
-    gstreamer
-    gst-plugins-base
-    gst-plugins-good
-    gst-plugins-bad
-    gst-plugins-ugly
-    gst-libav
-    libadwaita
-    exempi
-  ]);
+  ];
 
   mesonFlags = [
     "-Dnautilus=false"
     "-Dps=enabled"
   ] ++ lib.optionals (!withLibsecret) [
     "-Dkeyring=disabled"
-  ] ++ lib.optionals (!supportMultimedia) [
-    "-Dmultimedia=disabled"
   ];
-
-  env.NIX_CFLAGS_COMPILE = "-I${glib.dev}/include/gio-unix-2.0";
 
   preFixup = ''
     gappsWrapperArgs+=(--prefix XDG_DATA_DIRS : "${shared-mime-info}/share")
